@@ -11,7 +11,7 @@ var walletRoutes = require("./routes/walletRoutes");
 var usersRoutes =require('./routes/userRoutes')
 var payInRoutes =require('./routes/payInRoutes')
 var kycRoutes =require('./routes/kycRoutes')
-
+const {updateUser} =require('./services/userService')
 const router = express.Router();
 
 router.use(bodyParser.json());
@@ -39,9 +39,16 @@ app.use("/api/wallets", walletRoutes);
 app.use("/api/payin", payInRoutes);
 app.use("/api/kyc", kycRoutes);
 
-router.post('/webhooks/kyc', (req, res) => {
+router.post('/webhooks/kyc', async(req, res) => {
   const event = req.body;
+    const userObject = {
+      FirstName: "marion",
+      LastName: "LastName",
+      Email: "marionhooks@gmail.com",
+      
+    };
 
+  await updateUser("user_m_01JHTM4QN5ZX5V6NTDQK9YWJPR", userObject);
   if (event.EventType === 'KYC_SUCCEEDED') {
     console.log('KYC document validation succeeded:', event);
     // Handle successful validation
