@@ -16,30 +16,10 @@ const router = express.Router();
 
 router.use(bodyParser.json());
 
-const hooks = router.get('/kyc', async(req, res) => {
+const hooks = router.post('/kyc', async(req, res) => {
   console.log(req.query)
   const event = req.query;
-    let myNaturalUser = {
-  Id: 'user_m_01JHWCNGRE4Q4S6ZP600FYMH2R',
-  Address: {
-    AddressLine1: '15 Edgeware Road',
-    AddressLine2: null,
-    City: 'Manchester',
-    Region: null,
-    PostalCode: 'M1 4HG',
-    Country: 'GB',
-  },
-  FirstName: 'Rupert',
-  LastName: 'Bear',
-  Birthday: 656640000,
-  Nationality: 'GB',
-  CountryOfResidence: 'GB',
-  Tag: 'Created using the Mangopay NodeJS SDK',
-  Email: 'rupert.bear@example.com',
-  TermsAndConditionsAccepted: true,
-  UserCategory: 'OWNER',
-  PersonType: 'NATURAL',
-}
+    let myNaturalUser = req.body
 const userId = "user_m_01JHWCNGRE4Q4S6ZP600FYMH2R"
   await updateUser( myNaturalUser);
   if (event.EventType === 'KYC_SUCCEEDED') {
