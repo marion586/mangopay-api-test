@@ -13,10 +13,10 @@ const createUser = async (userObject) => {
 };
 
 // Update user
-const updateUser = async (userId, userObject) => {
+const updateUser = async (userObject) => {
   try {
       const mangopay = await getMangopayInstance();
-    const user = await mangopay.Users.update(userId, userObject);
+    const user = await mangopay.Users.update(userObject);
     return user;
   } catch (error) {
     console.error("Error updating user:", error);

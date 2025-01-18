@@ -15,6 +15,46 @@ const {updateUser} =require('./services/userService')
 const router = express.Router();
 
 router.use(bodyParser.json());
+
+const hooks = router.get('/kyc', async(req, res) => {
+  console.log(req.query)
+  const event = req.query;
+    let myNaturalUser = {
+  Id: 'user_m_01JHWCNGRE4Q4S6ZP600FYMH2R',
+  Address: {
+    AddressLine1: '15 Edgeware Road',
+    AddressLine2: null,
+    City: 'Manchester',
+    Region: null,
+    PostalCode: 'M1 4HG',
+    Country: 'GB',
+  },
+  FirstName: 'Rupert',
+  LastName: 'Bear',
+  Birthday: 656640000,
+  Nationality: 'GB',
+  CountryOfResidence: 'GB',
+  Tag: 'Created using the Mangopay NodeJS SDK',
+  Email: 'rupert.bear@example.com',
+  TermsAndConditionsAccepted: true,
+  UserCategory: 'OWNER',
+  PersonType: 'NATURAL',
+}
+const userId = "user_m_01JHWCNGRE4Q4S6ZP600FYMH2R"
+  await updateUser( myNaturalUser);
+  if (event.EventType === 'KYC_SUCCEEDED') {
+    console.log('KYC document validation succeeded:', event);
+    // Handle successful validation
+  } else if (event.EventType === 'KYC_FAILED') {
+    console.log('KYC document validation failed:', event);
+    // Handle failed validation
+  } else {
+    console.log('Unhandled event:', event);
+  }
+
+  // Send 200 OK response to Mangopay
+  res.status(200).send('OK');
+});
 dotenvSafe.config();
 
 
@@ -36,51 +76,16 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/api", indexRouter);
 app.use("/api/users", usersRoutes);
 app.use("/api/wallets", walletRoutes);
-app.use("/api/payin", payInRoutes);
+app.use("/api/payins", payInRoutes);
 app.use("/api/kyc", kycRoutes);
+app.use('/api/webhooks' ,hooks)
 
-router.post('/webhooks/kyc', async(req, res) => {
-  const event = req.body;
-    let myNaturalUser = {
-  Id: '171666652',
-  Address: {
-    AddressLine1: '15 Edgeware Road',
-    AddressLine2: null,
-    City: 'Manchester',
-    Region: null,
-    PostalCode: 'M1 4HG',
-    Country: 'GB',
-  },
-  FirstName: 'Rupert',
-  LastName: 'Bear',
-  Birthday: 656640000,
-  Nationality: 'GB',
-  CountryOfResidence: 'GB',
-  Tag: 'Created using the Mangopay NodeJS SDK',
-  Email: 'rupert.bear@example.com',
-  TermsAndConditionsAccepted: true,
-  UserCategory: 'OWNER',
-  PersonType: 'NATURAL',
-}
-
-  await updateUser("user_m_01JHWCNGRE4Q4S6ZP600FYMH2R", myNaturalUser);
-  if (event.EventType === 'KYC_SUCCEEDED') {
-    console.log('KYC document validation succeeded:', event);
-    // Handle successful validation
-  } else if (event.EventType === 'KYC_FAILED') {
-    console.log('KYC document validation failed:', event);
-    // Handle failed validation
-  } else {
-    console.log('Unhandled event:', event);
-  }
-
-  // Send 200 OK response to Mangopay
-  res.status(200).send('OK');
-});
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
+
+
 
 // error handler
 app.use(function (err, req, res, next) {
