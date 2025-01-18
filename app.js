@@ -41,14 +41,29 @@ app.use("/api/kyc", kycRoutes);
 
 router.post('/webhooks/kyc', async(req, res) => {
   const event = req.body;
-    const userObject = {
-      FirstName: "marion",
-      LastName: "LastName",
-      Email: "marionhooks@gmail.com",
-      
-    };
+    let myNaturalUser = {
+  Id: '171666652',
+  Address: {
+    AddressLine1: '15 Edgeware Road',
+    AddressLine2: null,
+    City: 'Manchester',
+    Region: null,
+    PostalCode: 'M1 4HG',
+    Country: 'GB',
+  },
+  FirstName: 'Rupert',
+  LastName: 'Bear',
+  Birthday: 656640000,
+  Nationality: 'GB',
+  CountryOfResidence: 'GB',
+  Tag: 'Created using the Mangopay NodeJS SDK',
+  Email: 'rupert.bear@example.com',
+  TermsAndConditionsAccepted: true,
+  UserCategory: 'OWNER',
+  PersonType: 'NATURAL',
+}
 
-  await updateUser("user_m_01JHTM4QN5ZX5V6NTDQK9YWJPR", userObject);
+  await updateUser("user_m_01JHWCNGRE4Q4S6ZP600FYMH2R", myNaturalUser);
   if (event.EventType === 'KYC_SUCCEEDED') {
     console.log('KYC document validation succeeded:', event);
     // Handle successful validation
