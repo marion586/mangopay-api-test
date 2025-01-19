@@ -2,6 +2,7 @@ module.exports = (models) => {
   return {
     Query: {
       getUsers: async () => {
+        console.log(models.User)
         return await models.User.findAll();
       },
       getUser: async (_, { id }) => {

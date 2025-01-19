@@ -16,5 +16,11 @@ module.exports = ({ db }) => ({
     const collection = db.collection(this.collection);
     return collection.findOne({ id });
   },
+
+  async findAll() {
+    console.log("find all")
+    const collection = db.collection(this.collection);
+    return collection.find().toArray()
+  }
   
 });
