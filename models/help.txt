@@ -1,0 +1,167 @@
+To clean up and connect your resolvers to the database (MongoDB in your case), you need to modify them to query the database instead of using in-memory arrays (`users` and `tasks`). You will be working with models that interact with MongoDB, so instead of handling data directly in the resolvers, you'll utilize MongoDB collections and models.
+
+Here's how you can refactor your resolvers to be cleaner and database-aware:
+
+### Steps to Refactor:
+
+1. **Use Models for Database Operations**: You'll interact with the database using models that you load in the `db` module.
+2. **Refactor Resolvers**: Modify your resolvers to use the MongoDB queries (e.g., `find()`, `findOne()`, `insertOne()`, `updateOne()`, `deleteOne()`) instead of operating on in-memory data.
+
+Let's go ahead and refactor your resolvers:
+
+### Refactored Code
+
+First, let's assume that you have MongoDB models for `User` and `Task` in your `models` directory. For example, you might have `User.js` and `Task.js` files that define your models.
+
+#### 1. **MongoDB Models** (Example)
+```javascript
+// models/User.js
+module.exports = ({ db }) => {
+  const collection = db.collection('users');
+  
+  return {
+    findAll: () => collection.find().toArray(),
+    findById: (id) => collection.findOne({ id }),
+    create: (userData) => collection.insertOne(userData),
+  };
+};
+
+// models/Task.js
+module.exports = ({ db }) => {
+  const collection = db.collection('tasks');
+  
+  return {
+    findAll: () => collection.find().toArray(),
+    findById: (id) => collection.findOne({ id }),
+    create: (taskData) => collection.insertOne(taskData),
+    update: (id, updates) => collection.updateOne({ id }, { $set: updates }),
+    delete: (id) => collection.deleteOne({ id }),
+  };
+};
+```
+
+These models should be in the `models/` directory and will use the MongoDB `collection` methods like `find()`, `findOne()`, `insertOne()`, `updateOne()`, and `deleteOne()`.
+
+#### 2. **Refactor the Resolvers**
+
+Next, refactor your resolvers to interact with MongoDB using these models.
+
+```javascript
+module.exports = (models) => {
+  return {
+    Query: {
+      getUsers: async () => {
+        return await models.User.findAll();
+      },
+      getUser: async (_, { id }) => {
+        return await models.User.findById(id);
+      },
+      getTasks: async () => {
+        return await models.Task.findAll();
+      },
+      getTask: async (_, { id }) => {
+        return await models.Task.findById(id);
+      },
+    },
+    Mutation: {
+      createUser: async (_, { name, email }) => {
+        const newUser = { id: `user_${Date.now()}`, name, email, tasks: [] };
+        await models.User.create(newUser); // Insert user into DB
+        return newUser;
+      },
+      createTask: async (_, { userId, title, description }) => {
+        const user = await models.User.findById(userId);
+        if (!user) throw new Error("User not found");
+
+        const newTask = {
+          id: `task_${Date.now()}`,
+          title,
+          description,
+          completed: false,
+          userId: user.id, // Store user ID in task for reference
+        };
+        await models.Task.create(newTask); // Insert task into DB
+        return newTask;
+      },
+      updateTask: async (_, { id, title, description, completed }) => {
+        const task = await models.Task.findById(id);
+        if (!task) throw new Error("Task not found");
+
+        const updatedTask = {};
+        if (title !== undefined) updatedTask.title = title;
+        if (description !== undefined) updatedTask.description = description;
+        if (completed !== undefined) updatedTask.completed = completed;
+
+        await models.Task.update(id, updatedTask); // Update task in DB
+        return { ...task, ...updatedTask }; // Return updated task
+      },
+      deleteTask: async (_, { id }) => {
+        const task = await models.Task.findById(id);
+        if (!task) throw new Error("Task not found");
+
+        await models.Task.delete(id); // Delete task from DB
+        return task; // Return deleted task
+      },
+    },
+    User: {
+      tasks: async (user) => {
+        return await models.Task.findAll({ userId: user.id }); // Find tasks for this user
+      },
+    },
+    Task: {
+      user: async (task) => {
+        return await models.User.findById(task.userId); // Find user associated with this task
+      },
+    },
+  };
+};
+```
+
+### Explanation of Changes:
+1. **User and Task Models**: We now rely on MongoDB models for `User` and `Task` for CRUD operations. The models encapsulate the logic for interacting with MongoDB.
+2. **Resolvers**: The resolvers now interact with the database through the models. For example:
+   - `getUsers` fetches all users from MongoDB via `models.User.findAll()`.
+   - `createUser` creates a new user using `models.User.create(newUser)`.
+   - `getTasks` fetches all tasks, and so on.
+3. **Relationships**: In the `User` and `Task` resolvers, you can see how related data is fetched. For example:
+   - `tasks: async (user)` resolves the user's tasks by calling `models.Task.findAll({ userId: user.id })`.
+   - `user: async (task)` resolves the user associated with the task by calling `models.User.findById(task.userId)`.
+
+### 3. **Connect Models with App**
+
+In your `app.js` or wherever you configure your Express app, pass the models to the resolvers:
+
+```javascript
+module.exports = async (database) => {
+  const app = express();
+
+  // Load models from database
+  const models = {
+    User: require('./models/User')({ db: database.db }),
+    Task: require('./models/Task')({ db: database.db }),
+  };
+
+  // Apollo Server Setup
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers: require("./graphql/resolvers")(models), // Pass models to resolvers
+  });
+
+  await server.start();
+
+  app.use(
+    '/graphql',
+    cors(),
+    express.json(),
+    expressMiddleware(server),
+  );
+
+  // Your routes and other middleware setup
+
+  return app;
+};
+```
+
+### Conclusion:
+- **Clean & Scalable**: This structure decouples database logic and makes your resolvers cleaner by using model methods instead of raw database queries inside each resolver.
+- **Database-Connected**: By using MongoDB models, you ensure that your data is persistent and scalable.

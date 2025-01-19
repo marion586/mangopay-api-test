@@ -4,13 +4,16 @@ const {
   updateUserHandler, 
   getUserHandler, 
   deleteUserHandler,
-  getUserEMoneyController
+  getUserEMoneyController,
+  getAllUsers
 } = require("../controllers/userController");
 
 const router = express.Router();
 
 // POST /api/users (Create a user)
 router.post("/", createUserHandler);
+
+router.get("/" ,getAllUsers)
 
 // PUT /api/users/:userId (Edit/update a user)
 router.put("/:userId", updateUserHandler);

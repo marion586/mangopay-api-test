@@ -1,4 +1,4 @@
-const { createUser, updateUser, getUser, deleteUser ,getUserEMoneyService } = require("../services/userService");
+const { createUser, updateUser, getUser, deleteUser ,getUserEMoneyService,getUsers } = require("../services/userService");
 
 // Create user
 const createUserHandler = async (req, res) => {
@@ -91,6 +91,17 @@ const getUserHandler = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    console.log("user all")
+    const users = await getUsers()
+    return users
+  } catch (error) {
+     console.error(error.message);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+}
+
 // Delete user by ID
 const deleteUserHandler = async (req, res) => {
   try {
@@ -142,5 +153,6 @@ module.exports = {
   updateUserHandler,
   getUserHandler,
   deleteUserHandler,
-  getUserEMoneyController
+  getUserEMoneyController,
+  getAllUsers
 };

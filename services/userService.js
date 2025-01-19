@@ -36,6 +36,17 @@ const getUser = async (userId) => {
   }
 };
 
+const getUsers = async()=> {
+   
+try {
+   const mangopay = await getMangopayInstance();
+   return await mangopay.Users.getAll()
+} catch (error) {
+  onsole.error("Error retrieving user:", error);
+    throw new Error("Failed to retrieve user. Please try again later.");
+}
+}
+
 // Delete user by ID
 const deleteUser = async (userId) => {
   try {
@@ -63,5 +74,6 @@ module.exports = {
   updateUser,
   getUser,
   deleteUser,
-  getUserEMoneyService
+  getUserEMoneyService,
+  getUsers
 };
