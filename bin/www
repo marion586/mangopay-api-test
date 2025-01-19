@@ -4,12 +4,15 @@ require("dotenv-safe").config();
 const http = require("http");
 const db = require("../db/index"); // Import your database connection module
 const appFactory = require("../app"); // Import the app factory
+const { exampleCronJob, dailyCronJob, weeklyCronJob } = require("../crons/cronJobs"); // Import cron jobs
 
 // Initialize the database and start the server
 db.then((database) => {
   // Pass the database to the app factory
   const app =  appFactory(database).then(res => {
-
+    exampleCronJob.start();
+    dailyCronJob.start();
+    weeklyCronJob.start();
   // Get the port from the environment or default to 3000
   const port = normalizePort(process.env.PORT || "3000");
   res.set("port", port);

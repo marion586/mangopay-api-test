@@ -20,6 +20,26 @@ const createPayIn = async (req, res) => {
   }
 };
 
+const createDirectCardPayInController = async (req, res) => {
+  const payinData = req.body;
+
+  try {
+    // Call service to create Direct Card PayIn
+    const payInResponse = await payInService.createDirectCardPayIn(payinData);
+
+    // Respond with the result
+    res.status(201).json({
+      success: true,
+      data: payInResponse,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 /**
  * Controller to retrieve a direct bank wire PayIn
  */
@@ -40,5 +60,5 @@ const getPayIn = async (req, res) => {
 };
 
 module.exports = {
-    getPayIn,createPayIn
+    getPayIn,createPayIn,createDirectCardPayInController
 }

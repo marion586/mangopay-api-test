@@ -12,6 +12,7 @@ var walletRoutes = require("./routes/walletRoutes");
 var usersRoutes =require('./routes/userRoutes')
 var payInRoutes =require('./routes/payInRoutes')
 var kycRoutes =require('./routes/kycRoutes')
+var cardRoutes =require('./routes/cardRoute')
 var cors = require('cors')
 const { ApolloServer } = require('@apollo/server') ;
 const { expressMiddleware }  = require('@apollo/server/express4');
@@ -69,6 +70,7 @@ app.use("/api/wallets", walletRoutes);
 app.use("/api/payins", payInRoutes);
 app.use("/api/kyc", kycRoutes);
 app.use('/api/webhooks' ,hooks)
+app.use('/api/card-registration' ,cardRoutes)
 
 // catch 404 and forward to error handler
 // Apollo Server for GraphQL

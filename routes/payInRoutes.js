@@ -9,5 +9,7 @@ router.post('/', payInController.createPayIn);
 
 // Route to retrieve a specific direct bank wire PayIn
 router.get('/:payInId', payInController.getPayIn);
+router.post('/direct-card-payin', payInController.createDirectCardPayInController);
+
 
 module.exports = router;

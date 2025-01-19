@@ -15,6 +15,17 @@ exports.createPayIn = async (payInData) => {
     return null;
   }
 };
+exports.createDirectCardPayIn = async (payinData) => {
+  try {
+    // Creating the PayIn via the Mangopay API
+     const mangopay = await getMangopayInstance();
+    const response = await mangopay.PayIns.create(payinData);
+    return response;
+  } catch (error) {
+    console.error('Error creating Direct Card PayIn:', error);
+    throw new Error('Failed to create Direct Card PayIn');
+  }
+};
 
 /**
  * Service to retrieve a direct bank wire PayIn
